@@ -1,0 +1,191 @@
+1
+	SELECT * FROM marcas WHERE  ciudadm='barcelona'
+
+2
+	SELECT * FROM clientes WHERE ciudad='madrid' and apellido='garcia'
+	SELECT * FROM clientes WHERE ciudad='madrid' or apellido='garcia'
+
+3
+	SELECT apellido,ciudad FROM clientes
+
+4
+	SELECT apellido FROM clientes WHERE ciudad='madrid'
+
+5
+	SELECT DISTINCT marcas.nombrem FROM marco,coches,marcas WHERE marco.cifm=marcas.cifm and marco.codcoche=coches.codcoche and coches.modelo='gtd'
+
+6
+	SELECT marcas.nombrem FROM marcas,coches,ventas,marco WHERE ventas.codcoche=coches.codcoche and marco.cifm=marcas.cifm and marco.codcoche=coches.codcoche and ventas.color='rojo'
+
+7
+	SELECT coches.nombrech FROM coches WHERE coches.modelo=(SELECT coches.modelo FROM coches WHERE nombrech='cordoba');
+
+	--Es mejor esta opcion, ya que si la subconsulta da mas de un resultado, este seguria funcionando:
+
+	SELECT coches.nombrech FROM coches WHERE coches.modelo IN (SELECT coches.modelo FROM coches WHERE nombrech='cordoba');
+
+	Otra solucion:
+
+	select distinct c2.nombrech from coches c1,coches c2 where c1.nombrech='cordoba' and c1.modelo=c2.modelo
+
+8
+	SELECT DISTINCT coches.nombrech FROM coches MINUS (SELECT DISTINCT coches.nombrech FROM coches WHERE modelo='gtd')
+
+Tambien es valido:
+
+	SELECT DISTINCT coches.nombrech FROM coches MINUS (SELECT DISTINCT coches.nombrech FROM coches WHERE modelo='gtd')
+
+9
+	SELECT marcas.cifm, clientes.dni FROM marcas,clientes WHERE clientes.ciudad=marcas.ciudadm ORDER BY marcas.cifm,clientes.dni
+
+	SELECT marcas.cifm, clientes.dni FROM marcas,clientes WHERE clientes.ciudad!=marcas.ciudadm ORDER BY marcas.cifm,clientes.dni	
+
+10
+
+	SELECT codcoche FROM distribucion,concesionarios WHERE concesionarios.cifc=distribucion.cifc and concesionarios.ciudadc='barcelona'
+		
+11
+
+	SELECT coches.codcoche FROM ventas,clientes,concesionarios 
+WHERE ventas.cifc=concesionarios.cifc 
+AND ventas.dni=clientes.dni  AND clientes.ciudad='madrid' AND concesionarios.ciudadc='madrid' ORDER BY codcoche
+
+12
+
+	SELECT coches.codcoche FROM ventas,coches,clientes,concesionarios WHERE ventas.codcoche=coches.codcoche 
+AND ventas.dni=clientes.dni AND ventas.cifc=concesionarios.cifc 
+AND clientes.ciudad=concesionarios.ciudadc
+
+13
+
+	SELECT nombrem,modelo FROM marcas,(SELECT  marcas.ciudadm AS lugar,marcas.nombrem AS modelo FROM marcas) WHERE lugar=marcas.ciudadm AND marcas.nombrem!=modelo
+
+Tambien hace lo mismo:
+
+	SELECT tabla1.nombrem,tabla2.nombrem 
+FROM marcas tabla1
+JOIN marcas tabla2 ON tabla1.ciudadm=tabla2.ciudadm WHERE tabla1.nombrem!=tabla2.nombrem
+
+14
+
+	SELECT DISTINCT clientes.dni FROM ventas,clientes,concesionarios WHERE ventas.dni=clientes.dni AND ventas.cifc=concesionarios.cifc AND concesionarios.ciudadc='madrid' ORDER BY clientes.dni
+
+15
+
+	SELECT ventas.color FROM ventas,concesionarios WHERE ventas.cifc=concesionarios.cifc AND concesionarios.nombrec='acar'
+
+16
+
+	SELECT coches.codcoche FROM ventas,coches,concesionarios WHERE ventas.cifc=concesionarios.cifc AND coches.codcoche=ventas.codcoche AND concesionarios.ciudadc='madrid' ORDER BY  codcoche
+
+17
+
+	SELECT clientes.nombre FROM ventas,clientes,coches,concesionarios WHERE ventas.codcoche=coches.codcoche AND ventas.cifc=concesionarios.cifc AND ventas.dni=clientes.dni AND concesionarios.nombrec='dcar'
+
+18
+
+	SELECT clientes.nombre,clientes.apellido FROM ventas,coches,clientes WHERE ventas.codcoche = coches.codcoche AND ventas.dni=clientes.dni AND ventas.color='blanco'
+
+19
+
+	SELECT distinct clientes.nombre,clientes.apellido FROM ventas,coches,concesionarios,clientes,distribucion
+WHERE ventas.cifc=concesionarios.cifc 
+AND ventas.dni=clientes.dni and concesionarios.cifc=distribucion.cifc and coches.codcoches=distribucion.codcoches
+AND coches.modelo='gti' AND concesionarios.ciudadc='madrid'
+
+20
+
+	SELECT nombre,apellido FROM clientes INNER JOIN
+(SELECT ventas1.dni id FROM ventas ventas1 JOIN ventas ventas2 ON ventas1.dni=ventas2.dni WHERE  ventas1.color='blanco' AND ventas2.color='rojo') venta ON clientes.dni=venta.id
+
+21
+
+	SELECT dni FROM ventas WHERE cifc='1' MINUS (SELECT dni FROM ventas WHERE cifc!='1')	
+
+22
+
+	SELECT nombre FROM coches,ventas,clientes,concesionarios 
+WHERE coches.codcoche=ventas.codcoche AND ventas.cifc=concesionarios.cifc AND ventas.dni=clientes.dni MINUS 
+(SELECT nombre FROM coches,ventas,clientes,concesionarios 
+WHERE coches.codcoche=ventas.codcoche AND ventas.cifc=concesionarios.cifc AND ventas.dni=clientes.dni AND ventas.color='rojo' AND concesionarios.ciudadc='madrid')
+ORDER BY nombre
+
+Esta esta bien:
+
+select nombre from clientes where dni in((select dni from ventas) minus (select dni from concesionarios co,ventas v where co.cifc=v.cifc and co.ciudadc='madrid' and v.color='rojo'))
+
+23
+
+	SELECT SUM(cantidad) FROM (SELECT * FROM coches NATURAL JOIN (SELECT *  FROM distribucion NATURAL JOIN concesionarios)) GROUP BY cifc
+
+24
+
+	SELECT * FROM   (SELECT cifc,AVG(cantidad) AS ca FROM distribucion NATURAL INNER JOIN concesionarios  GROUP BY cifc) WHERE ca>=10 
+
+25
+
+	SELECT * FROM   (SELECT cifc,SUM(cantidad) AS ca FROM distribucion NATURAL INNER JOIN concesionarios  GROUP BY cifc) WHERE ca>=10 AND ca<=18
+
+26
+
+	SELECT count(nombrem) FROM marcas
+
+27
+
+	SELECT nombre,apellido FROM ventas,concesionarios,clientes WHERE ventas.dni=clientes.dni AND ventas.cifc=concesionarios.cifc AND concesionarios.ciudadc='madrid' AND nombre LIKE 'j%'
+
+28
+
+	SELECT DISTINCT dni,nombre,apellido FROM clientes ORDER BY nombre
+
+29
+	
+	select distinct clientes.nombre,clientes.apellido from ventas join clientes on ventas.dni=clientes.dni where ventas.cifc in (Select ventas.cifc from ventas join clientes on ventas.dni = clientes.dni where clientes.dni='2') and clientes.dni<>'2'
+
+	Parte 2:
+
+	select distinct clientes.nombre,clientes.apellido from ventas join clientes on ventas.dni=clientes.dni where ventas.cifc in (Select ventas.cifc from ventas join clientes on ventas.dni = clientes.dni where clientes.dni='1') and clientes.dni<>'1'
+
+30
+
+	Select* from (select concesionarios.cifc,sum(cantidad) suma from distribucion join concesionarios on distribucion.cifc = concesionarios.cifc group by concesionarios.cifc) where suma >= (select avg(suma) from (select concesionarios.cifc,sum(cantidad) suma from distribucion join concesionarios on distribucion.cifc = concesionarios.cifc group by concesionarios.cifc));
+
+31
+
+	Select concesionarios.cifc, concesionarios.nombrec, concesionarios.ciudadc from (select concesionarios.cifc,avg(cantidad) promedio from concesionarios join distribucion on distribucion.cifc = concesionarios.cifc group by concesionarios.cifc) filtrado
+join concesionarios on filtrado.cifc=concesionarios.cifc where promedio=(select max(maxpromedio)from (select concesionarios.cifc,avg(cantidad) maxpromedio from concesionarios join distribucion on distribucion.cifc = concesionarios.cifc group by concesionarios.cifc ))
+
+32
+
+	select clientes.dni,clientes.nombre,clientes.apellido from clientes join (select clientes.dni,count(clientes.dni) total from ventas join clientes on ventas.dni = clientes.dni group by clientes.dni order by total DESC ) totalCoches on totalCoches.dni=clientes.dni
+where ROWNUM<=2;
+
+Parte 2
+
+	select *
+from (Select *
+      from (Select * from (select * from ventas order by color) where ROWNUM <= 4)
+      Minus
+      (Select * from (select * from ventas order by color) where ROWNUM = 1))
+order by color,cifc;
+
+33
+
+	Esto es la creacion de la vista
+
+	create view vista as
+(select *
+from (select clientes.dni, clientes.nombre, clientes.apellido
+      from clientes
+               join (select clientes.dni, count(clientes.dni) total
+                     from ventas
+                              join clientes on ventas.dni = clientes.dni
+                     group by clientes.dni
+                     order by total DESC) totalCoches on totalCoches.dni = clientes.dni
+      where ROWNUM <= 2));
+
+	Con esto se hace la solucion
+
+select v.dni,v.nombre,v.apellido,CODCOCHE,CIFC,COLOR from ventas join vista v on ventas.DNI = v.dni;
+	
+	
