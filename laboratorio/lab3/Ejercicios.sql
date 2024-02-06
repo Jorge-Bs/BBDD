@@ -150,5 +150,33 @@ formas diferentes*/
 SELECT Distinct t1.TIPO from TITULOS t1 join TITULOS t2 on t1.TIPO=t2.tipo and t1.ED_ID!=t2.ED_ID;
 
 /*25. Mostrar los tipos de libros cuyo precio máximo es al menos un 10% más caro que el precio
-medio para ese tipo. Y un 20%.*/
+medio para ese tipo. Y un 20%. ? preguntar */
 
+select tipo,round(avg(Precio),2) precio_medio from TITULOS group by tipo;
+
+select tipo,max(precio) from TITULOS group by tipo;
+
+select pre_medio.TIPO from (select tipo,round(avg(Precio),2) precio_medio from TITULOS group by tipo) pre_medio join (select tipo,max(precio) precio_maximo from TITULOS group by tipo) pre_max on pre_max.TIPO=pre_medio.TIPO where precio_maximo*0.9>=precio_medio;
+
+/*26. Mostrar los libros que tienen una pre-publicación mayor que la mayor pre-publicación que
+tiene la editorial ‘Prentice Hall’.*/
+
+select max(PRE_PUBLICACION) max_pre_pu from EDITORIALES join TITULOS T on EDITORIALES.ED_ID = T.ED_ID where ED_NOMBRE='Prentice Hall';
+
+select TITULO from TITULOS where PRE_PUBLICACION>(select max(PRE_PUBLICACION) max_pre_pu from EDITORIALES join TITULOS T on EDITORIALES.ED_ID = T.ED_ID where ED_NOMBRE='Prentice Hall');
+
+/*27. Mostrar los títulos de los libros publicados por una editorial localizada en una ciudad que
+comienza por la letra ‘B’*/
+
+SELECT TITULO from TITULOS join EDITORIALES on TITULOS.ED_ID = EDITORIALES.ED_ID where ED_CIUDAD like 'B%';
+
+/*28. Mostrar los nombres de las editoriales que no publican libros cuyo tipo sea bases de datos.
+Formalizar la consulta de dos formas diferentes*/
+
+Select EDITORIALES.ED_NOMBRE,EDITORIALES.ED_ID from EDITORIALES join TITULOS on EDITORIALES.ED_ID = TITULOS.ED_ID where TIPO='BD';
+
+SELECT ED_NOMBRE,ED_ID from EDITORIALES minus (Select EDITORIALES.ED_NOMBRE,EDITORIALES.ED_ID from EDITORIALES join TITULOS on EDITORIALES.ED_ID = TITULOS.ED_ID where TIPO='BD');
+
+SELECT ED_NOMBRE from(SELECT ED_NOMBRE,ED_ID from EDITORIALES minus (Select EDITORIALES.ED_NOMBRE,EDITORIALES.ED_ID from EDITORIALES join TITULOS on EDITORIALES.ED_ID = TITULOS.ED_ID where TIPO='BD'));
+
+Select ED_NOMBRE from EDITORIALES where ED_ID not in (Select EDITORIALES.ED_ID from EDITORIALES join TITULOS on EDITORIALES.ED_ID = TITULOS.ED_ID where TIPO='BD');
