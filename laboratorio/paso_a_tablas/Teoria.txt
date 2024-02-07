@@ -1,0 +1,8 @@
+Tipos de restricciones:
+1)PK
+2)UNIQUE
+3)CHECK	
+4)NOT NULL
+5)FK
+--------------------
+N-N ej: CONSTRAINT pk_esta_matriculado primary key(dnia,codasig)
