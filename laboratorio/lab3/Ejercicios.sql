@@ -180,3 +180,7 @@ SELECT ED_NOMBRE,ED_ID from EDITORIALES minus (Select EDITORIALES.ED_NOMBRE,EDIT
 SELECT ED_NOMBRE from(SELECT ED_NOMBRE,ED_ID from EDITORIALES minus (Select EDITORIALES.ED_NOMBRE,EDITORIALES.ED_ID from EDITORIALES join TITULOS on EDITORIALES.ED_ID = TITULOS.ED_ID where TIPO='BD'));
 
 Select ED_NOMBRE from EDITORIALES where ED_ID not in (Select EDITORIALES.ED_ID from EDITORIALES join TITULOS on EDITORIALES.ED_ID = TITULOS.ED_ID where TIPO='BD');
+
+
+
+select distinct clientes.nombre,clientes.apellido from ventas join clientes on ventas.dni=clientes.dni where ventas.cifc in (Select ventas.cifc from ventas join clientes on ventas.dni = clientes.dni where clientes.dni='2') and clientes.dni<>'2';
