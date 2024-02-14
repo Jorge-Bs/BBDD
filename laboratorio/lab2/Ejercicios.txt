@@ -117,7 +117,10 @@ select nombre from clientes where dni in((select dni from ventas) minus (select 
 23
 
 	SELECT SUM(cantidad) FROM (SELECT * FROM coches NATURAL JOIN (SELECT *  FROM distribucion NATURAL JOIN concesionarios)) GROUP BY cifc
-
+    
+    Mejor:
+    
+    SELECT cifc,SUM(cantidad) FROM distribucion GROUP BY cifc
 24
 
 	SELECT * FROM   (SELECT cifc,AVG(cantidad) AS ca FROM distribucion NATURAL INNER JOIN concesionarios  GROUP BY cifc) WHERE ca>=10 
@@ -160,6 +163,7 @@ join concesionarios on filtrado.cifc=concesionarios.cifc where promedio=(select 
 	select clientes.dni,clientes.nombre,clientes.apellido from clientes join (select clientes.dni,count(clientes.dni) total from ventas join clientes on ventas.dni = clientes.dni group by clientes.dni order by total DESC ) totalCoches on totalCoches.dni=clientes.dni
 where ROWNUM<=2;
 
+usar fecth first 2 rows only;
 Parte 2
 
 	select *

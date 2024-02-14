@@ -14,7 +14,7 @@ duracion decimal(3,0),
 tipo varchar(8),
 constraint pk_pelicula primary key (codpelicula),
 constraint uq_titulo unique(titulo),
-constraint in_tipo check ( tipo in ('ficción', 'aventuras' , 'terror'))
+constraint in_tipo check ( tipo in ('ficcion', 'aventuras' , 'terror'))
 );
 
 create table sala(
@@ -35,7 +35,7 @@ fecha DATE,
 codsala varchar(8),
 codpelicula varchar(8),
 entrada_vendidas varchar(8),
-constraint pk_proyecta primary key (sesion,fecha),
+constraint pk_proyecta primary key (sesion,fecha,codsala,codpelicula),
 constraint fg_proyecta_sala foreign key (codsala) references sala(codsala),
 constraint fg_proyecta_pelicula foreign key (codpelicula) references pelicula(codpelicula),
 constraint ck_proyecta_sesion check ( sesion in ('5','7','10') )
@@ -43,16 +43,18 @@ constraint ck_proyecta_sesion check ( sesion in ('5','7','10') )
 
 create table vendida(
 codentrada varchar(8),
-sesion varchar(8),
-fecha DATE,
+sesion varchar(8) not null,
+fecha DATE  not null,
+codsala varchar(8) not null,
+codpelicula varchar(8)  not null,
 constraint pk_vendida primary key (codentrada),
 constraint fg_vendida_entrada foreign key (codentrada) references entrada(codentrada),
-constraint fg_vendida_proyecta foreign key (sesion,fecha) references proyecta(sesion,fecha)
+constraint fg_vendida_proyecta foreign key (sesion,fecha,codsala,codpelicula) references proyecta(sesion,fecha,codsala,codpelicula)
 );
 
 create table esta_dividido(
 codsala varchar(8),
-codcine varchar(8),
+codcine varchar(8) not null,
 constraint pk_esta_dividido primary key (codsala),
 constraint fg_esta_dividido_sala foreign key (codsala) references sala(codsala),
 constraint fg_esta_dividido_cine foreign key (codcine) references cine(codcine)
