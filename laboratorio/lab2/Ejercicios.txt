@@ -158,12 +158,22 @@ select nombre from clientes where dni in((select dni from ventas) minus (select 
 	Select concesionarios.cifc, concesionarios.nombrec, concesionarios.ciudadc from (select concesionarios.cifc,avg(cantidad) promedio from concesionarios join distribucion on distribucion.cifc = concesionarios.cifc group by concesionarios.cifc) filtrado
 join concesionarios on filtrado.cifc=concesionarios.cifc where promedio=(select max(maxpromedio)from (select concesionarios.cifc,avg(cantidad) maxpromedio from concesionarios join distribucion on distribucion.cifc = concesionarios.cifc group by concesionarios.cifc ))
 
+Mejor:
+
+select cifc, avg(cantidad)
+from distribucion
+group by cifc
+having avg(cantidad)>= all(select avg(cantidad) from distribucion group by cifc)
+
+
 32
 
 	select clientes.dni,clientes.nombre,clientes.apellido from clientes join (select clientes.dni,count(clientes.dni) total from ventas join clientes on ventas.dni = clientes.dni group by clientes.dni order by total DESC ) totalCoches on totalCoches.dni=clientes.dni
 where ROWNUM<=2;
 
 usar fecth first 2 rows only;
+
+si es with ties en only añade duplicados
 Parte 2
 
 	select *
@@ -172,6 +182,12 @@ from (Select *
       Minus
       (Select * from (select * from ventas order by color) where ROWNUM = 1))
 order by color,cifc;
+
+
+
+Mejor
+select * from ventas order by color offset 1 rows fetch next 2 rows WITH ties;
+
 
 33
 
