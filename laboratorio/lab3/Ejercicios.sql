@@ -109,7 +109,8 @@ SELECT TITULO,AU_NOMBRE from TITULOS join TITULOSAUTORES join AUTORES on TITULOS
 
 /*18. Mostrar el nombre y apellidos de los editores, así como el nombre de su editor jefe.*/
 
-SElECT  ed1.EDITOR_NOMBRE,ed1.EDITOR_APELLIDO,ed2.EDITOR_NOMBRE jefe from EDITORES ed1 join EDITORES ed2 on ed1.EDITOR_JEFE=ed2.EDITOR_ID;
+SElECT  ed1.EDITOR_NOMBRE,ed1.EDITOR_APELLIDO,ed2.EDITOR_NOMBRE jefe from EDITORES ed1
+join EDITORES ed2 on ed1.EDITOR_JEFE=ed2.EDITOR_ID;
 
 /*19. Mostrar los datos de los autores (au_id, au_nombre y au_apellido) en los que coinciden su
 apellido. */

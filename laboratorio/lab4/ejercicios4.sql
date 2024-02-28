@@ -1,0 +1,161 @@
+/*1. Mostrar los nombres de los clientes con cuentas y préstamos en la sucursal Perryridge. Realizar
+la consulta de varias formas diferentes (utilizando exists, utilizando in, utilizando el producto de tablas y
+utilizando intersect)*/
+
+--forma in
+
+select CLIENTE.NOMBRE_CLIENTE from CLIENTE join PRESTATARIO on CLIENTE.NOMBRE_CLIENTE=PRESTATARIO.NOMBRE_CLIENTE
+    join PRESTAMO on PRESTAMO.NUM_PRESTAMO=PRESTATARIO.NUM_PRESTAMO JOIN SUCURSAL on SUCURSAL.NOMBRE_SUCURSAL=PRESTAMO.NOMBRE_SUCURSAL
+    where SUCURSAL.NOMBRE_SUCURSAL='Perryridge' and cliente.NOMBRE_CLIENTE in (
+
+select CLIENTE.NOMBRE_CLIENTE from cliente join DEPOSITANTE on cliente.NOMBRE_CLIENTE = DEPOSITANTE.NOMBRE_CLIENTE
+    join CUENTA on DEPOSITANTE.NUM_CUENTA = CUENTA.NUM_CUENTA
+    join SUCURSAL on CUENTA.NOMBRE_SUCURSAL = SUCURSAL.NOMBRE_SUCURSAL where CUENTA.NOMBRE_SUCURSAL='Perryridge');
+
+--forma exits -- preguntar --necesita el ultimo and?
+
+select c1.NOMBRE_CLIENTE  from CLIENTE c1 join PRESTATARIO on c1.NOMBRE_CLIENTE=PRESTATARIO.NOMBRE_CLIENTE
+    join PRESTAMO on PRESTAMO.NUM_PRESTAMO=PRESTATARIO.NUM_PRESTAMO JOIN SUCURSAL on SUCURSAL.NOMBRE_SUCURSAL=PRESTAMO.NOMBRE_SUCURSAL
+    where SUCURSAL.NOMBRE_SUCURSAL='Perryridge' and  exists  (
+
+select c2.NOMBRE_CLIENTE p from cliente c2 join DEPOSITANTE on c2.NOMBRE_CLIENTE = DEPOSITANTE.NOMBRE_CLIENTE
+    join CUENTA on DEPOSITANTE.NUM_CUENTA = CUENTA.NUM_CUENTA
+    join SUCURSAL on CUENTA.NOMBRE_SUCURSAL = SUCURSAL.NOMBRE_SUCURSAL where SUCURSAL.NOMBRE_SUCURSAL='Perryridge' and c2.NOMBRE_CLIENTE=c1.NOMBRE_CLIENTE);
+
+--forma intersec
+
+(select CLIENTE.NOMBRE_CLIENTE from CLIENTE join PRESTATARIO on CLIENTE.NOMBRE_CLIENTE=PRESTATARIO.NOMBRE_CLIENTE
+    join PRESTAMO on PRESTAMO.NUM_PRESTAMO=PRESTATARIO.NUM_PRESTAMO JOIN SUCURSAL on SUCURSAL.NOMBRE_SUCURSAL=PRESTAMO.NOMBRE_SUCURSAL
+    where SUCURSAL.NOMBRE_SUCURSAL='Perryridge' )
+
+intersect (
+
+select CLIENTE.NOMBRE_CLIENTE from cliente join DEPOSITANTE on cliente.NOMBRE_CLIENTE = DEPOSITANTE.NOMBRE_CLIENTE
+    join CUENTA on DEPOSITANTE.NUM_CUENTA = CUENTA.NUM_CUENTA
+    join SUCURSAL on CUENTA.NOMBRE_SUCURSAL = SUCURSAL.NOMBRE_SUCURSAL where CUENTA.NOMBRE_SUCURSAL='Perryridge');
+
+/*2. Mostrar los nombres de los clientes con cuentas, pero sin préstamos en la sucursal Perryridge.
+Realizar la consulta de varias formas diferentes (utilizando exists/not exists, utilizando in/not in o utilizando
+minus/except).*/
+
+--forma not in
+
+select CLIENTE.NOMBRE_CLIENTE from cliente
+    join DEPOSITANTE on cliente.NOMBRE_CLIENTE = DEPOSITANTE.NOMBRE_CLIENTE
+    join CUENTA on DEPOSITANTE.NUM_CUENTA = CUENTA.NUM_CUENTA
+    join SUCURSAL on CUENTA.NOMBRE_SUCURSAL = SUCURSAL.NOMBRE_SUCURSAL
+    where CUENTA.NOMBRE_SUCURSAL='Perryridge'
+    and CLIENTE.NOMBRE_CLIENTE not in
+        (select CLIENTE.NOMBRE_CLIENTE from CLIENTE
+            join PRESTATARIO on CLIENTE.NOMBRE_CLIENTE=PRESTATARIO.NOMBRE_CLIENTE
+            join PRESTAMO on PRESTAMO.NUM_PRESTAMO=PRESTATARIO.NUM_PRESTAMO
+            JOIN SUCURSAL on SUCURSAL.NOMBRE_SUCURSAL=PRESTAMO.NOMBRE_SUCURSAL
+            where SUCURSAL.NOMBRE_SUCURSAL='Perryridge');
+
+-- forma not exits
+
+select c1.NOMBRE_CLIENTE from cliente c1
+    join DEPOSITANTE on c1.NOMBRE_CLIENTE = DEPOSITANTE.NOMBRE_CLIENTE
+    join CUENTA on DEPOSITANTE.NUM_CUENTA = CUENTA.NUM_CUENTA
+    join SUCURSAL on CUENTA.NOMBRE_SUCURSAL = SUCURSAL.NOMBRE_SUCURSAL
+    where CUENTA.NOMBRE_SUCURSAL='Perryridge' and
+    not exists
+        (select c2.NOMBRE_CLIENTE from CLIENTE c2
+            join PRESTATARIO on c2.NOMBRE_CLIENTE=PRESTATARIO.NOMBRE_CLIENTE
+            join PRESTAMO on PRESTAMO.NUM_PRESTAMO=PRESTATARIO.NUM_PRESTAMO
+            JOIN SUCURSAL on SUCURSAL.NOMBRE_SUCURSAL=PRESTAMO.NOMBRE_SUCURSAL
+            where SUCURSAL.NOMBRE_SUCURSAL='Perryridge' and
+            c1.NOMBRE_CLIENTE=c2.NOMBRE_CLIENTE);
+
+--forma minus
+
+select c1.NOMBRE_CLIENTE from cliente c1
+    join DEPOSITANTE on c1.NOMBRE_CLIENTE = DEPOSITANTE.NOMBRE_CLIENTE
+    join CUENTA on DEPOSITANTE.NUM_CUENTA = CUENTA.NUM_CUENTA
+    join SUCURSAL on CUENTA.NOMBRE_SUCURSAL = SUCURSAL.NOMBRE_SUCURSAL
+    where CUENTA.NOMBRE_SUCURSAL='Perryridge' minus
+        (select c2.NOMBRE_CLIENTE from CLIENTE c2
+            join PRESTATARIO on c2.NOMBRE_CLIENTE=PRESTATARIO.NOMBRE_CLIENTE
+            join PRESTAMO on PRESTAMO.NUM_PRESTAMO=PRESTATARIO.NUM_PRESTAMO
+            JOIN SUCURSAL on SUCURSAL.NOMBRE_SUCURSAL=PRESTAMO.NOMBRE_SUCURSAL
+            where SUCURSAL.NOMBRE_SUCURSAL='Perryridge');
+
+--forma except --preguntar
+
+select c1.NOMBRE_CLIENTE from cliente c1
+    join DEPOSITANTE on c1.NOMBRE_CLIENTE = DEPOSITANTE.NOMBRE_CLIENTE
+    join CUENTA on DEPOSITANTE.NUM_CUENTA = CUENTA.NUM_CUENTA
+    join SUCURSAL on CUENTA.NOMBRE_SUCURSAL = SUCURSAL.NOMBRE_SUCURSAL
+    where CUENTA.NOMBRE_SUCURSAL='Perryridge'
+    except
+    select c2.NOMBRE_CLIENTE from CLIENTE c2
+    join PRESTATARIO on c2.NOMBRE_CLIENTE=PRESTATARIO.NOMBRE_CLIENTE
+    join PRESTAMO on PRESTAMO.NUM_PRESTAMO=PRESTATARIO.NUM_PRESTAMO
+    JOIN SUCURSAL on SUCURSAL.NOMBRE_SUCURSAL=PRESTAMO.NOMBRE_SUCURSAL
+    where SUCURSAL.NOMBRE_SUCURSAL='Perryridge';
+
+/*3. Mostrar los nombres de los clientes con cuentas en la sucursal en la que tiene cuentas el cliente
+Hayes. */
+
+select unique CLIENTE.NOMBRE_CLIENTE from CLIENTE
+join DEPOSITANTE  on CLIENTE.NOMBRE_CLIENTE = DEPOSITANTE.NOMBRE_CLIENTE
+join CUENTA  on DEPOSITANTE.NUM_CUENTA = CUENTA.NUM_CUENTA
+join SUCURSAL on CUENTA.NOMBRE_SUCURSAL = SUCURSAL.NOMBRE_SUCURSAL where SUCURSAL.NOMBRE_SUCURSAL
+in (
+
+select SUCURSAL.NOMBRE_SUCURSAL from CLIENTE
+join DEPOSITANTE on CLIENTE.NOMBRE_CLIENTE=DEPOSITANTE.NOMBRE_CLIENTE
+join CUENTA on CUENTA.NUM_CUENTA=DEPOSITANTE.NUM_CUENTA
+join SUCURSAL on SUCURSAL.NOMBRE_SUCURSAL=CUENTA.NOMBRE_SUCURSAL where CLIENTE.NOMBRE_CLIENTE='Hayes');
+
+/*4. Mostrar los nombres de las sucursales cuyo activo es mayor que el activo de alguna sucursal de
+Brooklyn.*/
+
+select NOMBRE_SUCURSAL
+from SUCURSAL where activo > some (
+
+
+select  ACTIVO
+from SUCURSAL
+where SUCURSAL.CIUDAD_SUCURSAL='Brooklyn');
+
+/*5. Mostrar los nombres de las sucursales cuyo activo es mayor que el activo de todas las
+sucursales de Brooklyn.*/
+
+select NOMBRE_SUCURSAL
+from SUCURSAL where activo > all (
+select  ACTIVO
+from SUCURSAL
+where SUCURSAL.CIUDAD_SUCURSAL='Brooklyn');
+
+/*6. Mostrar los nombres de los clientes de la sucursal Perryridge en orden alfabético.*/
+
+Select * from (select CLIENTE.NOMBRE_CLIENTE from CLIENTE
+join DEPOSITANTE on CLIENTE.NOMBRE_CLIENTE = DEPOSITANTE.NOMBRE_CLIENTE
+join CUENTA on DEPOSITANTE.NUM_CUENTA = CUENTA.NUM_CUENTA
+where cuenta.NOMBRE_SUCURSAL='Perryridge')
+union(
+select CLIENTE.NOMBRE_CLIENTE from CLIENTE
+join PRESTATARIO on CLIENTE.NOMBRE_CLIENTE = PRESTATARIO.NOMBRE_CLIENTE
+join PRESTAMO on PRESTATARIO.NUM_PRESTAMO = PRESTAMO.NUM_PRESTAMO
+where PRESTAMO.NOMBRE_SUCURSAL='Perryridge');
+
+/*7. Mostrar el nombre de las sucursales que tienen el mayor promedio de saldos.
+ */
+
+Select NOMBRE_SUCURSAL from(
+Select NOMBRE_SUCURSAL,avg(SALDO) from CUENTA
+group by NOMBRE_SUCURSAL
+fetch first row WITH TIES);
+
+/*8. Mostrar el promedio de los saldos de todos los clientes de la ciudad de Harrison que tienen al
+menos dos cuentas.
+ */
+
+ Select avg(SALDO) sal from CUENTA
+ join DEPOSITANTE on CUENTA.NUM_CUENTA = DEPOSITANTE.NUM_CUENTA
+ join CLIENTE on DEPOSITANTE.NOMBRE_CLIENTE = CLIENTE.NOMBRE_CLIENTE
+ where CIUDAD_CLIENTE='Harrison'
+ group by CLIENTE.NOMBRE_CLIENTE
+ having count(CLIENTE.NOMBRE_CLIENTE)>=2;
+
