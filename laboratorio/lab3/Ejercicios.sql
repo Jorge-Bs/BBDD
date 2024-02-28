@@ -19,10 +19,13 @@ select AU_NOMBRE,AU_APELLIDO,AU_TELEFONO from AUTORES order by AU_APELLIDO desc 
 
 select AU_NOMBRE,AU_APELLIDO from AUTORES where AU_TELEFONO IS NULL order by AU_NOMBRE;
 
-/*5. Mostrar los nombres, apellidos y teléfonos de todos los autores, indicando “sin teléfono” para
+/*5. Mostrar los nombres, apellidos y teléfonos de todos los autores, indicando “sin teléfono�? para
 aquellos que no tienen teléfono. Formular la consulta utilizando la función NVL*/
 
 select AU_NOMBRE,AU_APELLIDO,NVL(AU_TELEFONO,'Sin teléfono') as telefono from AUTORES   order by AU_NOMBRE;
+
+--NVL es de oracle colaesce sirve para todo
+select AU_NOMBRE,AU_APELLIDO,COALESCE(AU_TELEFONO,'Sin teléfono') as telefono from AUTORES   order by AU_NOMBRE;
 
 /*6. Mostrar el identificador de los títulos, el propio título y las ventas previstas para cada uno de
 los títulos cuyo tipo es bases de datos (BD) o programación (PROG). Ordenar los datos
@@ -63,6 +66,11 @@ select TITULOS.ED_ID,count(EDITORIALES.ED_ID) total from EDITORIALES join TITULO
 /*9.2*/
 
 select TITULOS.ED_ID,TIPO,count(EDITORIALES.ED_ID) total from EDITORIALES join TITULOS on EDITORIALES.ED_ID = TITULOS.ED_ID group by TITULOS.ED_ID,TIPO;
+
+--mejor:
+select ed_id, count(*)
+from titulos
+group by ed_id,tipo
 
 /*10. Mostrar para cada tipo de título el número de ejemplares existentes.*/
 
