@@ -1,0 +1,128 @@
+ORACLE	 
+
+1. declaración de constantes:
+	private static String USERNAME = "";
+	private static String PASSWORD = "";
+	private static String CONNECTION_STRING = "jdbc:oracle:thin:@156.35.94.98:1521:DESA19";
+	
+2. Conocer el nombre del driver a utilizar. Es decir, indicar la base de datos con la que vamos a trabajar. En este caso:
+   oracle.jdbc.OracleDriver.
+
+3. Localizar el fichero que implementa el driver: ojdbc6.jar. Importarlo en el proyecto. 
+    
+
+4. Registrar el driver. 
+   DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
+
+
+5. creación de la conexión:
+DriverManager.getConnection(CONNECTION_STRING, USERNAME,PASSWORD);
+
+6. Crear un método que registre el driver y cree la conexión: 
+
+
+private static Connection getConnection() {
+		DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
+		return DriverManager.getConnection(CONNECTION_STRING, USERNAME,PASSWORD);
+	}
+	
+
+7. Hacer ejemplo básico:  
+ public static void exercise0() {
+	
+		Connection con = getConnection();
+		Statement st = con.createStatement();
+		ResultSet rs = st.executeQuery();
+		
+		while (rs.next()) {
+			System.out.println("Cliente: ");
+			
+		}
+		rs.close();
+		st.close();
+		con.close();
+		
+	   
+}
+8. Para la consulta 5
+		System.out.println("Introduzca codcche:");	
+		String pcodcoche = ReadString();
+		System.out.println("Introduzca nombrech: ");	
+		String pnombrech = ReadString();
+		System.out.println("Introduzca modelo: ");	
+		String pmodelo = ReadString();
+
+
+9. Gestionar las excepciones:
+	try {
+			
+	    }
+	} 
+	catch (SQLException e) {			
+			System.err.println("SQL Exception " + e.getMessage());
+			e.printStackTrace();
+	}
+
+
+/*******************************************************************
+
+** CONSULTAS NECESARIAS DE LA SQL2:
+
+*********************************************************/
+
+--6) Obtener el NOMBRE de las MARCAS de las que se han vendido COCHES de COLOR rojo.
+
+SELECT DISTINCT M.nombrem
+FROM marcas M, marco R, ventas V
+WHERE M.cifm=R.cifm AND R.codcoche=V.codcoche AND V.color='rojo';
+
+
+--19) Obtener el nombre y el apellido de los clientes que han adquirido un coche en un concesionario de Madrid, el cual dispone de coches del modelo gti.
+
+
+SELECT nombre, apellido
+FROM clientes
+WHERE dni IN (SELECT DISTINCT V.dni
+    FROM ventas V, coches CH, concesionarios CO, distribucion D
+    WHERE V.cifc=CO.cifc AND CO.ciudadc='madrid' AND CO.cifc=D.cifc
+        AND D.codcoche = CH.codcoche AND CH.modelo='gti');
+	
+	
+--22) Obtener los nombres de los clientes que no han comprado coches de color rojo en concesionarios de Madrid.
+SELECT DISTINCT CL.nombre
+FROM clientes CL, ventas V
+WHERE V.dni=CL.dni AND CL.dni NOT IN (SELECT V.dni
+    FROM concesionarios CO, ventas V
+    WHERE CO.cifc=V.cifc AND CO.ciudadc='madrid' AND V.color='rojo');
+
+	
+
+--25) Obtener el cifc de los concesionarios que disponen de una cantidad de coches comprendida entre 10 y 18 unidades, ambas inclusive.
+SELECT cifc, sum(cantidad) AS total
+FROM distribucion
+GROUP BY cifc
+HAVING sum(cantidad)>=10 AND sum(cantidad)<=18;
+
+SELECT cifc, sum(cantidad) AS total
+FROM distribucion
+GROUP BY cifc
+HAVING sum(cantidad) BETWEEN 10 AND 18;	
+	
+	
+--31) Obtener el concesionario que tiene el mejor promedio de coches entre todos los concesionarios; es decir, el concesionario cuyo promedio de coches supera al promedio de coches de cada uno del resto de concesionarios.	
+		
+SELECT c.cifc, nombrec, ciudadc
+FROM concesionarios c, distribucion d
+WHERE c.cifc=d.cifc
+GROUP BY c.cifc, nombrec, ciudadc
+HAVING AVG(cantidad)>= ALL(SELECT AVG(cantidad) FROM distribucion GROUP BY cifc);
+
+SELECT c.cifc, nombrec, ciudadc
+FROM concesionarios c, distribucion d
+WHERE c.cifc=d.cifc
+GROUP BY c.cifc, nombrec, ciudadc
+HAVING AVG(cantidad)>= (SELECT MAX(media) FROM (SELECT AVG(cantidad) media FROM distribucion GROUP BY cifc)a);
+		
+
+
+
