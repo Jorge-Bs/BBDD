@@ -2,6 +2,8 @@ package bbdd.jdbc1;
 import java.sql.*;
 import java.util.Scanner;
 
+import javax.naming.spi.DirStateFactory.Result;
+
 public class Program {
 	
 	private static String USERNAME = "UO293697";
@@ -22,7 +24,9 @@ public class Program {
 			//exercise3();
 			//exercise5_1();
 			//exercise6_1();
-			exercise6_2();
+			//exercise6_2();
+			//exercise8();
+			exercise9_Examen1();
 		} catch (SQLException e) {
 			System.err.println("SQL Exception " + e.getMessage());
 			e.printStackTrace();
@@ -294,7 +298,14 @@ public class Program {
 		deben aparecer en el listado.
     */
 	public static void exercise8() throws SQLException {		
-			String	consulta = "select clientes.dni, count (distinct cifc) nconces, count(*) nventas from clientes, ventas where clientes.dni= ventas.dni group by clientes.dni,nombre,apellido";
+			String	consulta = "select clientes.dni ,nombre, apellido, count (distinct cifc) nconces, count(*) nventas from clientes, ventas where clientes.dni= ventas.dni group by clientes.dni,nombre,apellido";
+			
+			String consulta2= "select ventas.codcoche, nombrech,modelo,color\r\n"
+					+ "from ventas,coches \r\n"
+					+ "where ventas.codcoche=coches.codcoche and dni=?";
+			
+			String color = "select count(*) from ventas where color = ?";
+			
 			
 			
 			Connection con = getConnection();
@@ -303,6 +314,100 @@ public class Program {
 			
 			ResultSet rs = st.executeQuery(consulta);
 			
+			ResultSet rsCo;
+			ResultSet col;
+			
+			PreparedStatement ps = con.prepareStatement(consulta2);
+			
+			PreparedStatement pC = con.prepareStatement(color);
+			
+			while(rs.next()) {
+				System.out.print("Cliente: "+rs.getString(2)+" ");
+				System.out.print(rs.getString(3)+" ");
+				System.out.print(rs.getInt(5)+" ");
+				System.out.print(rs.getInt(4));
+				System.out.print("\n");
+				
+				ps.setString(1, rs.getString("dni"));
+				
+				rsCo = ps.executeQuery();
+				
+				
+				
+				while(rsCo.next()) {
+					pC.setString(1, rsCo.getString("color"));
+					
+					
+					
+					col = pC.executeQuery();
+					
+					col.next();
+					System.out.print("---> Coches: "+ rsCo.getInt("codcoche")+" "+rsCo.getString("nombrech")+" "+rsCo.getString("modelo")+" "+rsCo.getString("color")+" "+col.getInt(1)+"\n");
+					
+					col.close();
+				}
+				
+				
+				
+				rsCo.close();
+			}
+			
+			pC.close();
+			ps.close();
+			rs.close();
+			st.close();
+			con.close();
+			
+	}
+	
+	public static void exercise9_Examen1() throws SQLException {
+		Connection con = getConnection();
+		
+		String consulta = "SELECT c.codcine, sum(precio) recaudacion_cine\r\n"
+				+ "FROM cines c, salas s, entradas e\r\n"
+				+ "WHERE c.codcine=s.codcine AND s.codsala=e.codsala AND c.localidad=?\r\n"
+				+ "GROUP BY c.codcine";
+		
+		String consulta2 = "SELECT p.codpelicula, p.titulo, sum(precio) recaudacion_peli\r\n"
+				+ "         FROM peliculas p, entradas e, salas s\r\n"
+				+ "         WHERE p.codpelicula=e.codpelicula AND e.codsala=s.codsala AND\r\n"
+				+ "s.codcine= ? \r\n"
+				+ "         GROUP BY p.codpelicula, p.titulo";
+		
+		PreparedStatement c1 = con.prepareStatement(consulta);
+		
+		System.out.println("Introduce el nombre de la ciudad: ");
+		
+		String ciudad = ReadString();
+		
+		c1.setString(1, ciudad);
+		
+		ResultSet sc1 = c1.executeQuery();
+		
+		ResultSet sc2;
+		
+		PreparedStatement c2 = con.prepareStatement(consulta2);
+		
+		while(sc1.next()) {
+			System.out.println("Cine: "+sc1.getString("codcine")+" "+sc1.getString("recaudacion_cine"));
+			
+			c2.setString(1, sc1.getString("codcine"));
+			
+			sc2 = c2.executeQuery();
+			
+			while(sc2.next()) {
+				System.out.println("\t"+sc1.getString("codcine")+" "+sc2.getString("titulo")+" "+ sc2.getString("recaudacion_peli"));
+			}
+			
+			sc2.close();
+		}
+		
+		
+		c2.close();
+		sc1.close();
+		c1.close();
+		con.close();
+		
 	}
 		
 	@SuppressWarnings("resource")
